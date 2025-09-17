@@ -1,0 +1,46 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="lootGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cryptoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bgGradient)"/>
+  
+  <!-- Treasure chest base -->
+  <rect x="6" y="18" width="20" height="8" rx="2" fill="url(#lootGradient)"/>
+  
+  <!-- Chest lid -->
+  <path d="M6 18 L16 12 L26 18 Z" fill="url(#lootGradient)" opacity="0.8"/>
+  
+  <!-- Lock mechanism -->
+  <rect x="14" y="16" width="4" height="4" rx="1" fill="#1e293b"/>
+  <circle cx="16" cy="18" r="1" fill="#fbbf24"/>
+  
+  <!-- Crypto/blockchain elements -->
+  <rect x="8" y="6" width="3" height="3" rx="0.5" fill="url(#cryptoGradient)" opacity="0.8"/>
+  <rect x="21" y="6" width="3" height="3" rx="0.5" fill="url(#cryptoGradient)" opacity="0.8"/>
+  <rect x="8" y="24" width="3" height="3" rx="0.5" fill="url(#cryptoGradient)" opacity="0.8"/>
+  <rect x="21" y="24" width="3" height="3" rx="0.5" fill="url(#cryptoGradient)" opacity="0.8"/>
+  
+  <!-- Central encryption symbol -->
+  <circle cx="16" cy="14" r="3" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.9"/>
+  <path d="M14 14 L16 12 L18 14 M14 14 L16 16 L18 14" stroke="#fbbf24" stroke-width="1.5" fill="none" opacity="0.9"/>
+  
+  <!-- Sparkle effects -->
+  <circle cx="12" cy="10" r="0.5" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="20" cy="10" r="0.5" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="12" cy="22" r="0.5" fill="#fbbf24" opacity="0.6"/>
+  <circle cx="20" cy="22" r="0.5" fill="#fbbf24" opacity="0.6"/>
+</svg>
