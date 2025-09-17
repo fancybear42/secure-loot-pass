@@ -38,6 +38,30 @@ npm run dev
 
 Visit `http://localhost:5173` to see the magic happen! ✨
 
+### 🧪 Testing FHE Progress Tracking
+
+1. **Connect your wallet** using the wallet connection button
+2. **Wait for initialization** - FHE encryption will be set up automatically
+3. **Open the test panel** (visible in development mode)
+4. **Run the complete test suite** to verify:
+   - FHE service initialization
+   - Blockchain service connection
+   - Encryption/decryption functionality
+   - Data verification without decryption
+   - Complete blockchain integration
+
+### 🔧 Environment Configuration
+
+Create a `.env.local` file with the following variables:
+
+```bash
+VITE_CHAIN_ID=11155111
+VITE_RPC_URL=your_sepolia_rpc_url_here
+VITE_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id_here
+VITE_INFURA_API_KEY=your_infura_api_key_here
+VITE_CONTRACT_ADDRESS=your_deployed_contract_address_here
+```
+
 ## 🛠️ Tech Stack
 
 | Category | Technology |

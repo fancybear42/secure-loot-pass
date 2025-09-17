@@ -8,6 +8,7 @@ import { ProgressBar } from "./ProgressBar";
 import { WalletConnection } from "./WalletConnection";
 import { ChallengesModal } from "./ChallengesModal";
 import { PremiumModal } from "./PremiumModal";
+import { ProgressTestPanel } from "./ProgressTestPanel";
 import { Logo } from "./Logo";
 import { useAccount } from "wagmi";
 import { useProgressTracking } from "@/hooks/useProgressTracking";
@@ -179,6 +180,13 @@ export const BattlePass = () => {
             ))}
           </div>
         </div>
+
+        {/* Test Panel - Only show in development */}
+        {process.env.NODE_ENV === 'development' && isConnected && (
+          <div className="mb-12">
+            <ProgressTestPanel />
+          </div>
+        )}
 
         {/* Season Info */}
         <Card className="gradient-card border-border/50 p-8 text-center">
