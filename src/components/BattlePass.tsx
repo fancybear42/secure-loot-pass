@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Crown, Calendar, Trophy } from "lucide-react";
+import { Crown, Calendar, Trophy, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,9 @@ import { WalletConnection } from "./WalletConnection";
 import { ChallengesModal } from "./ChallengesModal";
 import { PremiumModal } from "./PremiumModal";
 import { Logo } from "./Logo";
+import { useAccount } from "wagmi";
+import { useProgressTracking } from "@/hooks/useProgressTracking";
+import { toast } from "sonner";
 import heroImage from "@/assets/battle-pass-hero.jpg";
 
 const mockRewards = [
@@ -21,14 +24,22 @@ const mockRewards = [
 ];
 
 export const BattlePass = () => {
+  const { address, isConnected } = useAccount();
+  const { isInitialized, playerStats, refreshPlayerStats } = useProgressTracking();
   const [currentProgress, setCurrentProgress] = useState(2);
   const [selectedReward, setSelectedReward] = useState<number | null>(null);
-  const [isWalletConnected] = useState(false);
   const [showChallenges, setShowChallenges] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const totalTiers = 6;
   const seasonTimeLeft = "23 days";
+
+  useEffect(() => {
+    if (isInitialized) {
+      // Update progress based on player level
+      setCurrentProgress(Math.min(playerStats.level, totalTiers));
+    }
+  }, [isInitialized, playerStats.level, totalTiers]);
 
   const handleUnlock = (rewardId: number) => {
     const reward = mockRewards.find(r => r.id === rewardId);
@@ -72,6 +83,12 @@ export const BattlePass = () => {
                 <Trophy className="w-4 h-4 text-accent" />
                 <span className="text-foreground">{currentProgress}/{totalTiers} tiers unlocked</span>
               </div>
+              {isConnected && (
+                <div className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-accent" />
+                  <span className="text-foreground">Level {playerStats.level}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -79,9 +96,24 @@ export const BattlePass = () => {
 
       <div className="container mx-auto px-6 py-12">
         {/* Wallet Connection */}
-        {!isWalletConnected && (
+        {!isConnected && (
           <div className="mb-12 max-w-md mx-auto">
             <WalletConnection />
+          </div>
+        )}
+
+        {/* Initialization Status */}
+        {isConnected && !isInitialized && (
+          <div className="mb-12 max-w-md mx-auto">
+            <Card className="gradient-card border-border/50 p-6 text-center">
+              <div className="flex items-center justify-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-accent" />
+                <span className="text-foreground">Initializing FHE encryption...</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Setting up secure progress tracking
+              </p>
+            </Card>
           </div>
         )}
 
@@ -100,6 +132,18 @@ export const BattlePass = () => {
             label="Battle Pass Progression"
             className="max-w-2xl mx-auto"
           />
+
+          {/* Experience Progress */}
+          {isConnected && (
+            <div className="mt-6 max-w-2xl mx-auto">
+              <ProgressBar 
+                current={playerStats.experience} 
+                total={playerStats.requiredExperience}
+                label={`Level ${playerStats.level} Experience`}
+                className="max-w-2xl mx-auto"
+              />
+            </div>
+          )}
 
           <div className="flex justify-center gap-4 mt-8">
             <Button 

@@ -1,9 +1,13 @@
-import { useState } from "react";
-import { X, Target, CheckCircle, Clock, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Target, CheckCircle, Clock, Zap, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useAccount } from "wagmi";
+import { useProgressTracking } from "@/hooks/useProgressTracking";
+import { TrackProgressRequest } from "@/services/progressService";
+import { toast } from "sonner";
 
 interface Challenge {
   id: number;
@@ -70,6 +74,82 @@ interface ChallengesModalProps {
 }
 
 export const ChallengesModal = ({ isOpen, onClose }: ChallengesModalProps) => {
+  const { address, isConnected } = useAccount();
+  const { isInitialized, isTracking, trackProgress, refreshProgress } = useProgressTracking();
+  const [trackingProgress, setTrackingProgress] = useState<Set<number>>(new Set());
+  const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges);
+
+  useEffect(() => {
+    if (isOpen && isInitialized) {
+      loadExistingProgress();
+    }
+  }, [isOpen, isInitialized]);
+
+  const loadExistingProgress = async () => {
+    const updatedChallenges = await Promise.all(
+      mockChallenges.map(async (challenge) => {
+        try {
+          const progress = await progressService.getProgress(challenge.id.toString());
+          if (progress) {
+            return {
+              ...challenge,
+              progress: progress.currentProgress,
+              isCompleted: progress.isCompleted
+            };
+          }
+        } catch (error) {
+          console.error(`Failed to load progress for challenge ${challenge.id}:`, error);
+        }
+        return challenge;
+      })
+    );
+    setChallenges(updatedChallenges);
+  };
+
+  const handleTrackProgress = async (challengeId: number) => {
+    if (!isConnected || !address || !isInitialized) {
+      toast.error('Please connect your wallet and wait for initialization');
+      return;
+    }
+
+    setTrackingProgress(prev => new Set(prev).add(challengeId));
+
+    try {
+      const challenge = challenges.find(c => c.id === challengeId);
+      if (!challenge) return;
+
+      const newProgress = Math.min(challenge.progress + 1, challenge.maxProgress);
+      
+      const request: TrackProgressRequest = {
+        challengeId: challengeId.toString(),
+        progress: newProgress,
+        maxProgress: challenge.maxProgress,
+        experience: challenge.difficulty === 'Easy' ? 10 : challenge.difficulty === 'Medium' ? 25 : 50,
+        userId: address
+      };
+
+      const success = await trackProgress(request);
+
+      if (success) {
+        // Update local state
+        setChallenges(prev => prev.map(c => 
+          c.id === challengeId 
+            ? { ...c, progress: newProgress, isCompleted: newProgress >= c.maxProgress }
+            : c
+        ));
+      }
+    } catch (error: any) {
+      console.error('Failed to track progress:', error);
+      toast.error(error.message || 'Failed to track progress');
+    } finally {
+      setTrackingProgress(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(challengeId);
+        return newSet;
+      });
+    }
+  };
+
   if (!isOpen) return null;
 
   const getDifficultyColor = (difficulty: Challenge["difficulty"]) => {
@@ -156,10 +236,12 @@ export const ChallengesModal = ({ isOpen, onClose }: ChallengesModalProps) => {
                   
                   {challenge.isCompleted ? (
                     <Button size="sm" className="gradient-unlock text-accent-foreground" disabled>
-                      Claimed
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Completed
                     </Button>
                   ) : challenge.progress >= challenge.maxProgress ? (
                     <Button size="sm" className="gradient-unlock text-accent-foreground">
+                      <CheckCircle className="w-4 h-4 mr-2" />
                       Claim Reward
                     </Button>
                   ) : (
@@ -167,8 +249,20 @@ export const ChallengesModal = ({ isOpen, onClose }: ChallengesModalProps) => {
                       size="sm" 
                       variant="outline" 
                       className="border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={() => handleTrackProgress(challenge.id)}
+                      disabled={trackingProgress.has(challenge.id) || !isConnected || !isInitialized || isTracking}
                     >
-                      Track Progress
+                      {trackingProgress.has(challenge.id) ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Encrypting...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-4 h-4 mr-2" />
+                          Track Progress
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
